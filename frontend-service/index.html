@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Streaming Client</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      #start-button {
+        padding: 10px 20px;
+        margin-top: 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      #output {
+        margin-top: 20px;
+        width: 80%;
+        max-width: 600px;
+        background-color: #f1f1f1;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .message {
+        padding: 5px;
+        border-bottom: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Streaming Client</h1>
+    <button id="start-button">Start Streaming</button>
+    <div id="output"></div>
+
+    <script>
+      document.getElementById('start-button').addEventListener('click', () => {
+        const outputDiv = document.getElementById('output');
+        outputDiv.innerHTML = '';
+
+        const eventSource = new EventSource('http://localhost:3001/consume');
+
+        eventSource.onmessage = function (event) {
+          const messageDiv = document.createElement('div');
+          messageDiv.className = 'message';
+          messageDiv.textContent = `${event.data}`;
+          outputDiv.appendChild(messageDiv);
+
+          if (event.data === 'done') {
+            eventSource.close();
+          }
+        };
+
+        eventSource.onerror = function () {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'message';
+          errorDiv.textContent = 'Kesalahan dalam menerima data.';
+          errorDiv.style.color = 'red';
+          outputDiv.appendChild(errorDiv);
+          eventSource.close();
+        };
+      });
+    </script>
+  </body>
+</html>
